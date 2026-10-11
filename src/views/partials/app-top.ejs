@@ -1,0 +1,35 @@
+<%- include('head', { title: title }) %>
+<script>Auth.guard(<%- JSON.stringify(roles) %>);</script>
+
+<header class="k-nav">
+    <a href="/" class="k-brand"><i class="material-icons">workspace_premium</i>KOMPANY</a>
+    <a href="#!" class="dropdown-trigger k-user" id="nav-user" data-target="user-dd"></a>
+</header>
+<ul id="user-dd" class="dropdown-content">
+    <li><a href="/profile">Mi cuenta</a></li>
+    <li><a href="#!" onclick="Auth.logout()">Cerrar sesión</a></li>
+</ul>
+
+<div class="app">
+    <aside class="side">
+        <a href="/dashboard/user" class="<%= active === 'dashboard' ? 'active' : '' %>">
+            <i class="material-icons">dashboard</i>Dashboard
+        </a>
+        <a href="/dashboard/admin" id="side-users" class="<%= active === 'users' ? 'active' : '' %>" style="display:none">
+            <i class="material-icons">people</i>Usuarios
+        </a>
+        <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>">
+            <i class="material-icons">person</i>Mi cuenta
+        </a>
+        <a href="#!" onclick="Auth.logout()">
+            <i class="material-icons">logout</i>Cerrar sesión
+        </a>
+    </aside>
+    <main class="content">
+<script>
+    (function () {
+        const s = Auth.getSession();
+        if (s && s.roles.includes('admin')) document.getElementById('side-users').style.display = 'flex';
+        Auth.me().then(u => Auth.renderNav(u)).catch(() => {});
+    })();
+</script>

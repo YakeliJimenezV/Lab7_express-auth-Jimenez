@@ -1,0 +1,75 @@
+<%- include('partials/app-top', { title: 'Usuarios', active: 'users', roles: ['admin'] }) %>
+
+<h4>Usuarios</h4>
+<p class="muted">Lista de todos los usuarios registrados en el sistema.</p>
+
+<div class="panel">
+    <div style="overflow-x:auto;">
+        <table class="k-table">
+            <thead>
+                <tr>
+                    <th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>
+                    <th>Edad</th><th>Rol</th><th>Fecha de registro</th><th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div class="detail-head" id="detail-head"></div>
+        <div class="detail-list" id="detail"></div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect btn-flat">Cerrar</a>
+    </div>
+</div>
+
+<%- include('partials/app-bottom') %>
+<script>
+const modal = M.Modal.init(document.getElementById('modal'));
+const chips = roles => roles.map(r => `<span class="chip-role ${r}">${Auth.esc(r)}</span>`).join(' ');
+
+async function viewUser(id) {
+    try {
+        const u = await Auth.api('/api/users/' + id);
+        document.getElementById('detail-head').innerHTML =
+            Auth.avatar(u, 56) +
+            `<div><b style="font-size:18px">${Auth.esc(u.name + ' ' + u.lastName)}</b><br>${chips(u.roles)}</div>`;
+        const items = [
+            ['ID', u.id],
+            ['Email', u.email],
+            ['Teléfono', u.phoneNumber],
+            ['Fecha de nacimiento', Auth.fmtDate(u.birthdate)],
+            ['Edad', u.age + ' años'],
+            ['Dirección', u.address || '-'],
+            ['URL de perfil', u.url_profile || '-'],
+            ['Fecha de registro', new Date(u.createdAt).toLocaleString('es-PE')]
+        ];
+        document.getElementById('detail').innerHTML = items.map(([k, v]) =>
+            `<div><b>${k}</b>${Auth.esc(v)}</div>`).join('');
+        modal.open();
+    } catch (err) {
+        M.toast({ html: err.message, classes: 'red' });
+    }
+}
+
+Auth.api('/api/users').then(users => {
+    document.getElementById('rows').innerHTML = users.map((u, i) => `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${Auth.esc(u.name + ' ' + u.lastName)}</td>
+            <td>${Auth.esc(u.email)}</td>
+            <td>${Auth.esc(u.phoneNumber)}</td>
+            <td>${u.age ?? '-'}</td>
+            <td>${chips(u.roles)}</td>
+            <td>${Auth.fmtDateLocal(u.createdAt)}</td>
+            <td><button class="btn-eye" title="Ver información" onclick="viewUser('${Auth.esc(u.id)}')">
+                <i class="material-icons">visibility</i></button></td>
+        </tr>`).join('');
+}).catch(err => M.toast({ html: err.message, classes: 'red' }));
+</script>
+</body>
+</html>

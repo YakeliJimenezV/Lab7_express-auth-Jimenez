@@ -1,0 +1,60 @@
+<%- include('partials/head', { title: 'Iniciar sesión' }) %>
+<script>if (Auth.getSession()) location.replace(Auth.homePath());</script>
+
+<div class="auth-wrap bg-building">
+    <div class="auth-left">
+        <a href="/" class="k-brand"><i class="material-icons">workspace_premium</i>KOMPANY</a>
+        <h1>Bienvenido de nuevo</h1>
+        <p>Inicia sesión para continuar a tu cuenta y acceder a todos nuestros servicios.</p>
+    </div>
+
+    <div class="auth-card">
+        <h5>Inicia sesión</h5>
+        <div class="sub">Ingresa tus credenciales para continuar</div>
+        <form id="form">
+            <div class="input-field">
+                <i class="material-icons prefix">person</i>
+                <input id="email" type="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-field">
+                <i class="material-icons prefix">lock</i>
+                <input id="password" type="password" required>
+                <label for="password">Password</label>
+                <i class="material-icons pw-toggle" onclick="Auth.togglePw('password', this)">visibility</i>
+            </div>
+            <button id="btn" class="btn btn-large w100" type="submit">Iniciar sesión</button>
+        </form>
+        <p class="center muted" style="margin-top:18px;font-size:13px;">
+            ¿No tienes una cuenta? <a href="/signUp" class="link">Regístrate</a>
+        </p>
+    </div>
+</div>
+
+<%- include('partials/foot') %>
+<script>
+document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/auth/signIn', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        Auth.setToken(data.token);
+        location.replace(Auth.homePath());
+    } catch (err) {
+        M.toast({ html: err.message, classes: 'red' });
+        btn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

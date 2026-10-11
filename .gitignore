@@ -1,0 +1,21 @@
+node_modules/
+# Mantener la documentación local sin publicarla en GitHub.
+/README.md
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+npm-debug.log*
+coverage/
+.npm-cache/
+.tmp/
+backups/
+dump/
+*.archive
+*.gz
+.DS_Store
+Thumbs.db

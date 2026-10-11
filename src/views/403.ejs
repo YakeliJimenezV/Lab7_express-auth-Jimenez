@@ -1,0 +1,19 @@
+<%- include('partials/head', { title: 'Acceso denegado' }) %>
+<%- include('partials/public-nav') %>
+
+<div class="err-wrap">
+    <div class="err-art">
+        <i class="material-icons">lock</i>
+        <span class="err-badge"><i class="material-icons">block</i></span>
+    </div>
+    <div class="err-text">
+        <h1>403</h1>
+        <h4>Acceso denegado</h4>
+        <p>No tienes permisos para acceder a esta página.<br>Si crees que es un error, contacta al administrador.</p>
+        <a id="back" href="/" class="btn btn-large">Volver al inicio</a>
+    </div>
+</div>
+
+<script>document.getElementById('back').href = Auth.getSession() ? Auth.homePath() : '/';</script>
+</body>
+</html>

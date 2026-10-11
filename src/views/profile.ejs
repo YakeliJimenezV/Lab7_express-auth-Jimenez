@@ -1,0 +1,105 @@
+<%- include('partials/app-top', { title: 'Mi cuenta', active: 'profile', roles: ['user', 'admin'] }) %>
+
+<h4>Mi cuenta</h4>
+<p class="muted">Consulta y actualiza tu información personal.</p>
+
+<div class="panel">
+    <div class="profile-card">
+        <div class="profile-side">
+            <div id="avatar"></div>
+            <div id="side-name" style="font-weight:600"></div>
+            <div id="side-roles" style="margin:6px 0"></div>
+            <div id="side-age" class="muted" style="font-size:12px"></div>
+        </div>
+
+        <form id="form" class="profile-form">
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    <input id="name" type="text" required>
+                    <label for="name">Nombres</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input id="lastName" type="text" required>
+                    <label for="lastName">Apellidos</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input id="phoneNumber" type="text" required>
+                    <label for="phoneNumber">Teléfono</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input id="birthdate" type="date" required>
+                    <label for="birthdate">Fecha de nacimiento</label>
+                </div>
+                <div class="input-field col s12">
+                    <input id="email" type="email" disabled>
+                    <label for="email">Email</label>
+                </div>
+                <div class="input-field col s12">
+                    <input id="url_profile" type="text">
+                    <label for="url_profile">URL de foto de perfil</label>
+                </div>
+                <div class="input-field col s12">
+                    <input id="address" type="text">
+                    <label for="address">Dirección</label>
+                </div>
+                <div class="input-field col s12">
+                    <input id="password" type="password">
+                    <label for="password">Nueva contraseña (opcional)</label>
+                    <span class="helper-text">Déjala vacía para mantener la actual</span>
+                </div>
+            </div>
+            <button id="btn" class="btn btn-large" type="submit">Guardar cambios</button>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/app-bottom') %>
+<script>
+const $ = id => document.getElementById(id);
+$('birthdate').max = new Date().toISOString().slice(0, 10);
+
+function fill(u) {
+    $('avatar').innerHTML = Auth.avatar(u, 110);
+    $('side-name').textContent = u.name + ' ' + u.lastName;
+    $('side-roles').innerHTML = u.roles.map(r => `<span class="chip-role ${r}">${Auth.esc(r)}</span>`).join(' ');
+    $('side-age').textContent = `${u.age} años · Registro: ${Auth.fmtDateLocal(u.createdAt)}`;
+    $('email').value = u.email;
+    $('name').value = u.name || '';
+    $('lastName').value = u.lastName || '';
+    $('phoneNumber').value = u.phoneNumber || '';
+    $('birthdate').value = u.birthdate ? u.birthdate.slice(0, 10) : '';
+    $('url_profile').value = u.url_profile || '';
+    $('address').value = u.address || '';
+    M.updateTextFields();
+}
+
+Auth.me().then(fill).catch(err => M.toast({ html: err.message, classes: 'red' }));
+
+$('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = {
+        name: $('name').value.trim(),
+        lastName: $('lastName').value.trim(),
+        phoneNumber: $('phoneNumber').value.trim(),
+        birthdate: $('birthdate').value,
+        url_profile: $('url_profile').value.trim(),
+        address: $('address').value.trim()
+    };
+    if ($('password').value) body.password = $('password').value;
+
+    $('btn').disabled = true;
+    try {
+        await Auth.api('/api/users/me', { method: 'PUT', body: JSON.stringify(body) });
+        $('password').value = '';
+        const u = await Auth.me(true);
+        fill(u);
+        Auth.renderNav(u);
+        M.toast({ html: 'Perfil actualizado', classes: 'green' });
+    } catch (err) {
+        M.toast({ html: err.message, classes: 'red' });
+    }
+    $('btn').disabled = false;
+});
+</script>
+</body>
+</html>

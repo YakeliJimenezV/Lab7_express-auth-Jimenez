@@ -1,0 +1,36 @@
+<%- include('partials/app-top', { title: 'Dashboard', active: 'dashboard', roles: ['user', 'admin'] }) %>
+
+<div class="banner">
+    <div>
+        <h4 id="welcome">¡Bienvenido!</h4>
+        <p class="muted">Aquí están tus datos principales.</p>
+    </div>
+    <i class="material-icons banner-ico">dashboard</i>
+</div>
+<div class="info-grid" id="grid"></div>
+
+<%- include('partials/app-bottom') %>
+<script>
+Auth.me().then(u => {
+    document.getElementById('welcome').textContent = `¡Bienvenido, ${u.name}!`;
+    const cards = [
+        { icon: 'person', label: 'Mi perfil', value: 'Ver y editar información', href: '/profile' },
+        { icon: 'mail', label: 'Email', value: u.email },
+        { icon: 'phone', label: 'Teléfono', value: u.phoneNumber },
+        { icon: 'cake', label: 'Nacimiento', value: `${Auth.fmtDate(u.birthdate)} (${u.age} años)` },
+        { icon: 'home', label: 'Dirección', value: u.address || '-' },
+        { icon: 'verified_user', label: 'Rol', value: u.roles.join(', ') },
+        { icon: 'event_available', label: 'Fecha de registro', value: Auth.fmtDateLocal(u.createdAt) }
+    ];
+    document.getElementById('grid').innerHTML = cards.map(c => {
+        const tag = c.href ? `a href="${c.href}"` : 'div';
+        const end = c.href ? 'a' : 'div';
+        return `<${tag} class="info-card">
+            <div class="ico"><i class="material-icons">${c.icon}</i></div>
+            <div><b>${c.label}</b><span>${Auth.esc(c.value)}</span></div>
+        </${end}>`;
+    }).join('');
+}).catch(err => M.toast({ html: err.message, classes: 'red' }));
+</script>
+</body>
+</html>

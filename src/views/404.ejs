@@ -1,0 +1,18 @@
+<%- include('partials/head', { title: 'Página no encontrada' }) %>
+<%- include('partials/public-nav') %>
+
+<div class="err-wrap">
+    <div class="err-art">
+        <i class="material-icons">search</i>
+    </div>
+    <div class="err-text">
+        <h1>404</h1>
+        <h4>Página no encontrada</h4>
+        <p>La página que buscas no existe o ha sido movida.</p>
+        <a id="back" href="/" class="btn btn-large">Volver al inicio</a>
+    </div>
+</div>
+
+<script>document.getElementById('back').href = Auth.getSession() ? Auth.homePath() : '/';</script>
+</body>
+</html>

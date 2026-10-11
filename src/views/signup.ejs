@@ -1,0 +1,96 @@
+<%- include('partials/head', { title: 'Regístrate' }) %>
+<script>if (Auth.getSession()) location.replace(Auth.homePath());</script>
+
+<div class="auth-wrap bg-building">
+    <div class="auth-left">
+        <a href="/" class="k-brand"><i class="material-icons">workspace_premium</i>KOMPANY</a>
+        <h1>Crea tu cuenta</h1>
+        <p>Únete y forma parte de nuestra comunidad. Es rápido y sencillo.</p>
+    </div>
+
+    <div class="auth-card">
+        <h5>Regístrate</h5>
+        <div class="sub">Completa tus datos para crear tu cuenta</div>
+        <form id="form">
+            <div class="row" style="margin-bottom:0">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">person</i>
+                    <input id="name" type="text" required>
+                    <label for="name">Nombres</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="lastName" type="text" required>
+                    <label for="lastName">Apellidos</label>
+                </div>
+            </div>
+            <div class="input-field">
+                <i class="material-icons prefix">phone</i>
+                <input id="phoneNumber" type="text" required>
+                <label for="phoneNumber">Teléfono</label>
+            </div>
+            <div class="input-field">
+                <i class="material-icons prefix">event</i>
+                <input id="birthdate" type="date" required>
+                <label for="birthdate" class="active">Fecha de nacimiento</label>
+            </div>
+            <div class="input-field">
+                <i class="material-icons prefix">mail</i>
+                <input id="email" type="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-field">
+                <i class="material-icons prefix">lock</i>
+                <input id="password" type="password" required>
+                <label for="password">Password</label>
+                <i class="material-icons pw-toggle" onclick="Auth.togglePw('password', this)">visibility</i>
+                <span class="helper-text">Mín. 8 caracteres, 1 mayúscula, 1 dígito y 1 especial (# $ % &amp; * @)</span>
+            </div>
+            <button id="btn" class="btn btn-large w100" type="submit">Crear cuenta</button>
+        </form>
+        <p class="center muted" style="margin-top:18px;font-size:13px;">
+            ¿Ya tienes una cuenta? <a href="/signIn" class="link">Inicia sesión</a>
+        </p>
+    </div>
+</div>
+
+<%- include('partials/foot') %>
+<script>
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[#$%&*@]).{8,}$/;
+document.getElementById('birthdate').max = new Date().toISOString().slice(0, 10);
+
+document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const val = id => document.getElementById(id).value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!PASSWORD_REGEX.test(password)) {
+        return M.toast({ html: 'La contraseña debe tener 8+ caracteres, 1 mayúscula, 1 dígito y 1 especial (# $ % & * @)', classes: 'red' });
+    }
+
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/auth/signUp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: val('name'),
+                lastName: val('lastName'),
+                phoneNumber: val('phoneNumber'),
+                birthdate: val('birthdate'),
+                email: val('email'),
+                password
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        M.toast({ html: 'Cuenta creada. Redirigiendo...', classes: 'green' });
+        setTimeout(() => location.replace('/signIn'), 1200);
+    } catch (err) {
+        M.toast({ html: err.message, classes: 'red' });
+        btn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>
